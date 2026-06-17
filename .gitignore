@@ -1,0 +1,5 @@
+node_modules/
+agenda.db
+err.txt
+test.js
+*.log

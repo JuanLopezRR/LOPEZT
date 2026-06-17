@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Agenda — Lopez Tech</title>
+<link rel="icon" type="image/png" href="assets/lopeztech-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue-300:#74A9F3;--blue-500:#2E6FE0;--blue-600:#2257B8;--blue-700:#163E82;
+  --ink-900:#1B2230;--ink-700:#2B3342;
+  --bg:#F5F8FC;--surface:#FFFFFF;
+  --slate-600:#5B6472;--slate-400:#8B95A5;--slate-200:#C7D0E0;
+  --border:#E1E7F1;
+  --whatsapp:#25D366;--whatsapp-dark:#1DA851;
+  --danger:#C8453B;--danger-bg:#FDF0EF;
+  --success:#1DA851;--success-bg:#E8FBF0;
+  --warning:#D97706;--warning-bg:#FEF9E7;
+  --radius-lg:22px;--radius-md:14px;--radius-sm:9px;
+  --shadow-md:0 10px 28px -10px rgba(20,40,80,0.18);
+  --shadow-lg:0 28px 56px -18px rgba(18,38,78,0.24);
+  --font-display:'Space Grotesk',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --font-mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-body);background:var(--bg);color:var(--ink-700);line-height:1.55;-webkit-font-smoothing:antialiased;}
+a{color:inherit;text-decoration:none;}
+button{font-family:inherit;cursor:pointer;}
+input,select,textarea{font-family:inherit;}
+
+.topbar{background:var(--ink-900);padding:14px 0;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.topbar .wrap{display:flex;align-items:center;gap:12px;}
+.topbar img{height:30px;}
+.topbar .brand{font-family:var(--font-display);font-weight:700;color:#fff;font-size:1rem;}
+.topbar .badge{font-family:var(--font-mono);font-size:0.7rem;background:var(--blue-500);color:#fff;padding:3px 10px;border-radius:999px;font-weight:600;}
+.topbar-right{display:flex;align-items:center;gap:16px;}
+.topbar-right a{color:#9AA7BD;font-size:0.85rem;font-weight:500;transition:color .15s;}
+.topbar-right a:hover{color:#fff;}
+
+.wrap{max-width:1200px;margin:0 auto;padding-inline:24px;}
+
+/* ---- STATS ---- */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:24px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:18px 16px;display:flex;align-items:center;gap:14px;}
+.stat-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex:none;}
+.stat-icon svg{width:20px;height:20px;}
+.stat-icon.blue{background:#EEF4FE;color:var(--blue-500);}
+.stat-icon.yellow{background:var(--warning-bg);color:var(--warning);}
+.stat-icon.green{background:var(--success-bg);color:var(--success);}
+.stat-icon.red{background:var(--danger-bg);color:var(--danger);}
+.stat-info .num{font-family:var(--font-display);font-size:1.6rem;font-weight:700;color:var(--ink-900);line-height:1;}
+.stat-info .label{font-size:0.78rem;color:var(--slate-400);font-weight:500;margin-top:2px;}
+
+/* ---- TOOLBAR ---- */
+.toolbar{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap;align-items:center;}
+.search-box{
+  flex:1;min-width:220px;position:relative;
+}
+.search-box input{
+  width:100%;padding:10px 14px 10px 40px;border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  font-size:0.9rem;background:var(--surface);color:var(--ink-900);transition:border-color .15s;
+}
+.search-box input:focus{border-color:var(--blue-500);outline:none;}
+.search-box svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--slate-400);}
+
+.view-toggle{display:flex;border:1.5px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;}
+.view-btn{padding:9px 16px;font-size:0.85rem;font-weight:600;border:none;background:var(--surface);color:var(--slate-600);transition:all .15s;display:flex;align-items:center;gap:6px;}
+.view-btn:not(:last-child){border-right:1.5px solid var(--border);}
+.view-btn.active{background:var(--blue-500);color:#fff;}
+.view-btn:hover:not(.active){background:var(--bg);}
+
+.export-btn{
+  padding:9px 16px;font-size:0.85rem;font-weight:600;border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);background:var(--surface);color:var(--slate-600);
+  display:flex;align-items:center;gap:6px;transition:all .15s;
+}
+.export-btn:hover{border-color:var(--blue-300);color:var(--blue-600);}
+
+/* ---- FILTERS ---- */
+.filters{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.filter-btn{
+  font-size:0.82rem;font-weight:600;padding:7px 14px;border-radius:999px;border:1.5px solid var(--border);
+  background:var(--surface);color:var(--slate-600);transition:all .15s;
+}
+.filter-btn:hover{border-color:var(--blue-300);color:var(--blue-600);}
+.filter-btn.active{background:var(--blue-500);border-color:var(--blue-500);color:#fff;}
+.filter-btn .count{display:inline-block;background:rgba(0,0,0,0.08);border-radius:999px;padding:1px 6px;font-size:0.7rem;margin-left:3px;}
+.filter-btn.active .count{background:rgba(255,255,255,0.25);}
+
+.sort-select{
+  margin-left:auto;padding:7px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  font-size:0.82rem;color:var(--slate-600);background:var(--surface);
+}
+
+/* ---- TODAY WIDGET ---- */
+.today-widget{
+  margin-top:24px;background:linear-gradient(135deg,var(--blue-700),var(--blue-500));
+  border-radius:var(--radius-lg);padding:24px 28px;color:#fff;
+  display:grid;grid-template-columns:1fr 1fr;gap:24px;
+}
+.today-left h3{font-family:var(--font-display);font-size:1.1rem;opacity:0.9;}
+.today-left .today-date{font-family:var(--font-mono);font-size:0.85rem;opacity:0.65;margin-top:4px;}
+.today-stats{display:flex;gap:20px;margin-top:16px;}
+.today-stat{text-align:center;}
+.today-stat .ts-num{font-family:var(--font-display);font-size:1.8rem;font-weight:700;}
+.today-stat .ts-label{font-size:0.72rem;opacity:0.7;}
+.today-timeline{display:flex;flex-direction:column;gap:8px;max-height:180px;overflow-y:auto;}
+.today-item{
+  display:flex;align-items:center;gap:10px;padding:8px 12px;
+  background:rgba(255,255,255,0.12);border-radius:var(--radius-sm);font-size:0.85rem;
+}
+.today-item .ti-time{font-family:var(--font-mono);font-weight:600;min-width:70px;opacity:0.8;}
+.today-item .ti-name{font-weight:600;}
+.today-item .ti-plan{font-family:var(--font-mono);font-size:0.72rem;opacity:0.6;margin-left:auto;}
+@media(max-width:700px){.today-widget{grid-template-columns:1fr;}}
+
+/* ---- CALENDAR VIEW ---- */
+.calendar-view{display:none;margin-top:24px;}
+.calendar-view.active{display:block;}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.cal-header h3{font-family:var(--font-display);font-size:1.15rem;color:var(--ink-900);}
+.cal-nav{display:flex;gap:8px;}
+.cal-nav button{
+  width:34px;height:34px;border-radius:50%;border:1.5px solid var(--border);
+  background:var(--surface);display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.cal-nav button:hover{border-color:var(--blue-500);color:var(--blue-500);}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.cal-dow{text-align:center;font-family:var(--font-mono);font-size:0.72rem;font-weight:600;color:var(--slate-400);padding:8px 0;text-transform:uppercase;}
+.cal-day{
+  min-height:80px;border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:6px 8px;background:var(--surface);transition:border-color .15s;
+}
+.cal-day:hover{border-color:var(--blue-300);}
+.cal-day.today{border:2px solid var(--blue-500);background:#F0F5FF;}
+.cal-day.other-month{opacity:0.35;}
+.cal-day .cd-num{font-family:var(--font-mono);font-size:0.78rem;font-weight:600;color:var(--ink-700);}
+.cal-day .cd-dots{display:flex;gap:3px;margin-top:4px;flex-wrap:wrap;}
+.cal-dot{width:7px;height:7px;border-radius:50%;}
+.cal-dot.pendiente{background:var(--warning);}
+.cal-dot.aprobada{background:var(--success);}
+.cal-dot.rechazada{background:var(--danger);}
+
+/* ---- LIST VIEW ---- */
+.list-view{margin-top:20px;padding-bottom:60px;}
+.list-view.active{display:block;}
+.citas-list{display:flex;flex-direction:column;gap:12px;}
+
+.cita-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:20px 24px;box-shadow:var(--shadow-md);
+  display:grid;grid-template-columns:1fr auto;gap:16px;
+  transition:border-color .15s;
+}
+.cita-card:hover{border-color:var(--blue-300);}
+.cita-card.estado-pendiente{border-left:4px solid var(--warning);}
+.cita-card.estado-aprobada{border-left:4px solid var(--success);}
+.cita-card.estado-rechazada{border-left:4px solid var(--danger);}
+
+.cita-header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.cita-header .name{font-family:var(--font-display);font-size:1.08rem;font-weight:700;color:var(--ink-900);}
+.estado-badge{
+  font-family:var(--font-mono);font-size:0.68rem;font-weight:600;
+  padding:3px 10px;border-radius:999px;text-transform:uppercase;letter-spacing:0.04em;
+}
+.estado-badge.pendiente{background:var(--warning-bg);color:var(--warning);}
+.estado-badge.aprobada{background:var(--success-bg);color:var(--success);}
+.estado-badge.rechazada{background:var(--danger-bg);color:var(--danger);}
+
+.cita-meta{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:8px;margin-top:12px;
+}
+.meta-item{display:flex;flex-direction:column;gap:1px;}
+.meta-label{font-size:0.68rem;color:var(--slate-400);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;font-family:var(--font-mono);}
+.meta-value{font-size:0.88rem;color:var(--ink-700);font-weight:500;}
+.meta-value.plan{font-family:var(--font-mono);color:var(--blue-700);font-weight:600;}
+
+.cita-notas{
+  margin-top:10px;padding:10px 14px;background:var(--bg);border-radius:var(--radius-sm);
+  font-size:0.85rem;color:var(--slate-600);font-style:italic;
+}
+
+.cita-actions{display:flex;flex-direction:column;gap:6px;justify-content:center;min-width:130px;}
+.action-btn{
+  font-size:0.78rem;font-weight:600;padding:7px 14px;border-radius:var(--radius-sm);
+  border:none;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px;
+}
+.action-btn:active{transform:translateY(1px);}
+.btn-aprobar{background:var(--success);color:#fff;}
+.btn-aprobar:hover{background:#179444;}
+.btn-rechazar{background:var(--danger);color:#fff;}
+.btn-rechazar:hover{background:#A8362E;}
+.btn-pendiente{background:var(--warning);color:#fff;}
+.btn-pendiente:hover{background:#B8650A;}
+.btn-editar{background:var(--blue-500);color:#fff;}
+.btn-editar:hover{background:var(--blue-600);}
+.btn-whatsapp{background:var(--whatsapp);color:#fff;}
+.btn-whatsapp:hover{background:var(--whatsapp-dark);}
+.btn-eliminar{background:transparent;border:1.5px solid var(--border);color:var(--slate-600);}
+.btn-eliminar:hover{border-color:var(--danger);color:var(--danger);}
+
+/* ---- MODAL ---- */
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;
+  align-items:center;justify-content:center;backdrop-filter:blur(4px);
+}
+.modal-overlay.open{display:flex;}
+.modal{
+  background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);
+  width:90%;max-width:540px;max-height:85vh;overflow-y:auto;
+}
+.modal-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 24px;border-bottom:1px solid var(--border);
+}
+.modal-header h3{font-family:var(--font-display);font-size:1.1rem;color:var(--ink-900);}
+.modal-close{
+  width:32px;height:32px;border-radius:50%;border:none;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--slate-600);
+  transition:all .15s;
+}
+.modal-close:hover{background:var(--danger-bg);color:var(--danger);}
+.modal-body{padding:24px;}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;}
+
+.form-group{margin-bottom:16px;}
+.form-group label{display:block;font-size:0.82rem;font-weight:600;color:var(--ink-700);margin-bottom:5px;}
+.form-group input,.form-group select,.form-group textarea{
+  width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  font-size:0.92rem;color:var(--ink-900);background:var(--surface);transition:border-color .15s;
+}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--blue-500);outline:none;}
+.form-group textarea{resize:vertical;min-height:70px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:500px){.form-row{grid-template-columns:1fr;}}
+
+.btn-save{background:var(--blue-500);color:#fff;padding:10px 24px;border-radius:var(--radius-sm);border:none;font-weight:600;font-size:0.9rem;}
+.btn-save:hover{background:var(--blue-600);}
+.btn-cancel{background:var(--surface);border:1.5px solid var(--border);color:var(--slate-600);padding:10px 20px;border-radius:var(--radius-sm);font-weight:600;font-size:0.9rem;}
+.btn-cancel:hover{border-color:var(--blue-300);}
+
+.empty-state{text-align:center;padding:60px 20px;color:var(--slate-400);}
+.empty-state svg{width:44px;height:44px;margin:0 auto 14px;opacity:0.4;}
+.empty-state h3{font-family:var(--font-display);color:var(--ink-700);font-size:1.05rem;}
+.empty-state p{margin-top:6px;font-size:0.88rem;}
+
+@media(max-width:700px){
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+  .cita-card{grid-template-columns:1fr;}
+  .cita-actions{flex-direction:row;flex-wrap:wrap;}
+  .cal-day{min-height:50px;}
+  .cal-day .cd-dots{display:none;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <img src="assets/lopeztech-icon.png" alt="Lopez Tech">
+    <span class="brand">LOPEZ TECH</span>
+    <span class="badge">Admin</span>
+  </div>
+  <div class="topbar-right wrap">
+    <a href="index.html">← Volver al sitio</a>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- STATS -->
+  <div class="stats-row" id="statsRow">
+    <div class="stat-card">
+      <div class="stat-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+      <div class="stat-info"><div class="num" id="statTotal">0</div><div class="label">Total citas</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon yellow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+      <div class="stat-info"><div class="num" id="statPendientes">0</div><div class="label">Pendientes</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4L19 6"/></svg></div>
+      <div class="stat-info"><div class="num" id="statAprobadas">0</div><div class="label">Aprobadas</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></div>
+      <div class="stat-info"><div class="num" id="statRechazadas">0</div><div class="label">Rechazadas</div></div>
+    </div>
+  </div>
+
+  <!-- TODAY WIDGET -->
+  <div class="today-widget" id="todayWidget" style="display:none;">
+    <div class="today-left">
+      <h3>Citas de hoy</h3>
+      <div class="today-date" id="todayDate"></div>
+      <div class="today-stats">
+        <div class="today-stat"><div class="ts-num" id="todayCount">0</div><div class="ts-label">citas</div></div>
+        <div class="today-stat"><div class="ts-num" id="todayPend">0</div><div class="ts-label">pendientes</div></div>
+      </div>
+    </div>
+    <div class="today-timeline" id="todayTimeline"></div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" id="searchInput" placeholder="Buscar por nombre, negocio, teléfono...">
+    </div>
+    <div class="view-toggle">
+      <button class="view-btn active" data-view="lista" id="viewLista">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        Lista
+      </button>
+      <button class="view-btn" data-view="calendario" id="viewCal">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Calendario
+      </button>
+    </div>
+    <button class="export-btn" id="exportBtn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      CSV
+    </button>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters" id="filtersBar">
+    <button class="filter-btn active" data-filter="todas">Todas <span class="count" id="countTodas">0</span></button>
+    <button class="filter-btn" data-filter="pendiente">Pendientes <span class="count" id="countPend">0</span></button>
+    <button class="filter-btn" data-filter="aprobada">Aprobadas <span class="count" id="countAprob">0</span></button>
+    <button class="filter-btn" data-filter="rechazada">Rechazadas <span class="count" id="countRech">0</span></button>
+    <select class="sort-select" id="sortSelect">
+      <option value="fecha-desc">Más recientes</option>
+      <option value="fecha-asc">Más antiguas</option>
+      <option value="nombre-asc">Nombre A-Z</option>
+      <option value="nombre-desc">Nombre Z-A</option>
+    </select>
+  </div>
+
+  <!-- LIST VIEW -->
+  <div class="list-view active" id="listView">
+    <div class="citas-list" id="citasList"></div>
+  </div>
+
+  <!-- CALENDAR VIEW -->
+  <div class="calendar-view" id="calView">
+    <div class="cal-header">
+      <h3 id="calTitle"></h3>
+      <div class="cal-nav">
+        <button id="calPrev">‹</button>
+        <button id="calToday">Hoy</button>
+        <button id="calNext">›</button>
+      </div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+  </div>
+
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Editar cita</h3>
+      <button class="modal-close" id="modalClose">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editId">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" id="editNombre">
+        </div>
+        <div class="form-group">
+          <label>Negocio</label>
+          <input type="text" id="editNegocio">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="tel" id="editTelefono">
+        </div>
+        <div class="form-group">
+          <label>Correo</label>
+          <input type="email" id="editCorreo">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Plan</label>
+          <select id="editPlan">
+            <option value="basico">Plan Básico</option>
+            <option value="personalizado">Plan Personalizado</option>
+            <option value="soporte">Solo soporte</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Estado</label>
+          <select id="editEstado">
+            <option value="pendiente">Pendiente</option>
+            <option value="aprobada">Aprobada</option>
+            <option value="rechazada">Rechazada</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Fecha</label>
+          <input type="date" id="editFecha">
+        </div>
+        <div class="form-group">
+          <label>Hora</label>
+          <input type="text" id="editHora">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Notas</label>
+        <textarea id="editNotas"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" id="modalCancel">Cancelar</button>
+      <button class="btn-save" id="modalSave">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PLAN_LABELS={basico:'Plan Básico',personalizado:'Plan Personalizado',soporte:'Solo soporte'};
+const DOW_ABBR=['dom','lun','mar','mié','jué','vie','sáb'];
+const DOW_FULL=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const MONTHS=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+let allCitas=[];
+let currentFilter='todas';
+let currentSort='fecha-desc';
+let searchTerm='';
+let currentView='lista';
+let calMonth=new Date().getMonth();
+let calYear=new Date().getFullYear();
+
+function formatFecha(fechaStr){
+  const d=new Date(fechaStr+'T12:00:00');
+  return `${DOW_FULL[d.getDay()]} ${d.getDate()} de ${MONTHS[d.getMonth()]}`;
+}
+
+function formatFechaShort(fechaStr){
+  const d=new Date(fechaStr+'T12:00:00');
+  return `${d.getDate()} ${MONTHS[d.getMonth()].slice(0,3)}`;
+}
+
+function matchesSearch(c){
+  if(!searchTerm) return true;
+  const s=searchTerm.toLowerCase();
+  return(c.nombre||'').toLowerCase().includes(s)||(c.negocio||'').toLowerCase().includes(s)||(c.telefono||'').toLowerCase().includes(s)||(c.correo||'').toLowerCase().includes(s);
+}
+
+function getFiltered(){
+  let list=allCitas.filter(c=>matchesSearch(c));
+  if(currentFilter!=='todas') list=list.filter(c=>c.estado===currentFilter);
+  const [key,dir]=currentSort.split('-');
+  list.sort((a,b)=>{
+    let va,vb;
+    if(key==='fecha'){va=a.fecha+a.hora;vb=b.fecha+b.hora;}
+    else{va=(a.nombre||'').toLowerCase();vb=(b.nombre||'').toLowerCase();}
+    if(va<vb) return dir==='asc'?-1:1;
+    if(va>vb) return dir==='asc'?1:-1;
+    return 0;
+  });
+  return list;
+}
+
+function updateStats(){
+  document.getElementById('statTotal').textContent=allCitas.length;
+  document.getElementById('statPendientes').textContent=allCitas.filter(c=>c.estado==='pendiente').length;
+  document.getElementById('statAprobadas').textContent=allCitas.filter(c=>c.estado==='aprobada').length;
+  document.getElementById('statRechazadas').textContent=allCitas.filter(c=>c.estado==='rechazada').length;
+  document.getElementById('countTodas').textContent=allCitas.length;
+  document.getElementById('countPend').textContent=allCitas.filter(c=>c.estado==='pendiente').length;
+  document.getElementById('countAprob').textContent=allCitas.filter(c=>c.estado==='aprobada').length;
+  document.getElementById('countRech').textContent=allCitas.filter(c=>c.estado==='rechazada').length;
+}
+
+function renderTodayWidget(){
+  const today=new Date().toISOString().slice(0,10);
+  const todayCitas=allCitas.filter(c=>c.fecha===today).sort((a,b)=>a.hora.localeCompare(b.hora));
+  const widget=document.getElementById('todayWidget');
+  if(todayCitas.length===0){widget.style.display='none';return;}
+  widget.style.display='grid';
+  const d=new Date();
+  document.getElementById('todayDate').textContent=`${DOW_FULL[d.getDay()]} ${d.getDate()} de ${MONTHS[d.getMonth()]}`;
+  document.getElementById('todayCount').textContent=todayCitas.length;
+  document.getElementById('todayPend').textContent=todayCitas.filter(c=>c.estado==='pendiente').length;
+  document.getElementById('todayTimeline').innerHTML=todayCitas.map(c=>`
+    <div class="today-item">
+      <span class="ti-time">${c.hora}</span>
+      <span class="ti-name">${c.nombre}</span>
+      <span class="ti-plan">${PLAN_LABELS[c.plan]||c.plan||''}</span>
+    </div>`).join('');
+}
+
+function renderList(){
+  const list=getFiltered();
+  const container=document.getElementById('citasList');
+  if(list.length===0){
+    container.innerHTML=`<div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      <h3>No hay citas</h3><p>${searchTerm?'Sin resultados para "'+searchTerm+'"':'Las nuevas citas aparecerán aquí.'}</p></div>`;
+    return;
+  }
+  container.innerHTML=list.map(c=>{
+    const actions=[];
+    if(c.estado!=='aprobada') actions.push(`<button class="action-btn btn-aprobar" onclick="cambiarEstado(${c.id},'aprobada')">✓ Aprobar</button>`);
+    if(c.estado!=='rechazada') actions.push(`<button class="action-btn btn-rechazar" onclick="cambiarEstado(${c.id},'rechazada')">✗ Rechazar</button>`);
+    if(c.estado!=='pendiente') actions.push(`<button class="action-btn btn-pendiente" onclick="cambiarEstado(${c.id},'pendiente')">↺ Pendiente</button>`);
+    actions.push(`<button class="action-btn btn-editar" onclick="openEdit(${c.id})">✎ Editar</button>`);
+    if(c.telefono){
+      const msg=encodeURIComponent(`Hola ${c.nombre}, tu cita del ${formatFecha(c.fecha)} a las ${c.hora} ha sido ${c.estado==='aprobada'?'aprobada':'actualizada'}. — Lopez Tech`);
+      actions.push(`<a class="action-btn btn-whatsapp" href="https://wa.me/57${c.telefono.replace(/\D/g,'')}?text=${msg}" target="_blank">WhatsApp</a>`);
+    }
+    actions.push(`<button class="action-btn btn-eliminar" onclick="eliminarCita(${c.id})">✕ Eliminar</button>`);
+    return `
+    <div class="cita-card estado-${c.estado}">
+      <div>
+        <div class="cita-header">
+          <span class="name">${c.nombre}</span>
+          <span class="estado-badge ${c.estado}">${c.estado}</span>
+        </div>
+        <div class="cita-meta">
+          <div class="meta-item"><span class="meta-label">Plan</span><span class="meta-value plan">${PLAN_LABELS[c.plan]||c.plan||'—'}</span></div>
+          <div class="meta-item"><span class="meta-label">Fecha</span><span class="meta-value">${formatFecha(c.fecha)}</span></div>
+          <div class="meta-item"><span class="meta-label">Hora</span><span class="meta-value">${c.hora}</span></div>
+          <div class="meta-item"><span class="meta-label">Negocio</span><span class="meta-value">${c.negocio||'—'}</span></div>
+          <div class="meta-item"><span class="meta-label">Teléfono</span><span class="meta-value">${c.telefono||'—'}</span></div>
+          <div class="meta-item"><span class="meta-label">Correo</span><span class="meta-value">${c.correo||'—'}</span></div>
+          <div class="meta-item"><span class="meta-label">Creado</span><span class="meta-value">${c.creado||'—'}</span></div>
+        </div>
+        ${c.notas?`<div class="cita-notas">"${c.notas}"</div>`:''}
+      </div>
+      <div class="cita-actions">${actions.join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderCalendar(){
+  const grid=document.getElementById('calGrid');
+  const title=document.getElementById('calTitle');
+  title.textContent=`${MONTHS[calMonth]} ${calYear}`;
+  const firstDay=new Date(calYear,calMonth,1).getDay();
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const today=new Date();
+  const todayStr=today.toISOString().slice(0,10);
+  const prevMonth=new Date(calYear,calMonth,0);
+  const prevDays=prevMonth.getDate();
+
+  let html='';
+  ['dom','lun','mar','mié','jué','vie','sáb'].forEach(d=>html+=`<div class="cal-dow">${d}</div>`);
+
+  for(let i=firstDay-1;i>=0;i--){
+    const day=prevDays-i;
+    const m=calMonth===0?11:calMonth-1;
+    const y=calMonth===0?calYear-1:calYear;
+    const dateStr=`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const dayCitas=allCitas.filter(c=>c.fecha===dateStr);
+    html+=`<div class="cal-day other-month"><div class="cd-num">${day}</div><div class="cd-dots">${dayCitas.map(c=>`<span class="cal-dot ${c.estado}"></span>`).join('')}</div></div>`;
+  }
+
+  for(let day=1;day<=daysInMonth;day++){
+    const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const isToday=dateStr===todayStr;
+    const dayCitas=allCitas.filter(c=>c.fecha===dateStr);
+    html+=`<div class="cal-day${isToday?' today':''}" onclick="filterByDate('${dateStr}')"><div class="cd-num">${day}</div><div class="cd-dots">${dayCitas.map(c=>`<span class="cal-dot ${c.estado}"></span>`).join('')}</div></div>`;
+  }
+
+  const totalCells=firstDay+daysInMonth;
+  const remaining=totalCells%7===0?0:7-(totalCells%7);
+  for(let i=1;i<=remaining;i++){
+    const m=calMonth===11?0:calMonth+1;
+    const y=calMonth===11?calYear+1:calYear;
+    const dateStr=`${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+    const dayCitas=allCitas.filter(c=>c.fecha===dateStr);
+    html+=`<div class="cal-day other-month"><div class="cd-num">${i}</div><div class="cd-dots">${dayCitas.map(c=>`<span class="cal-dot ${c.estado}"></span>`).join('')}</div></div>`;
+  }
+
+  grid.innerHTML=html;
+}
+
+function filterByDate(dateStr){
+  document.getElementById('searchInput').value='';
+  searchTerm='';
+  currentView='lista';
+  document.getElementById('listView').classList.add('active');
+  document.getElementById('calView').classList.remove('active');
+  document.querySelectorAll('.view-btn').forEach(b=>b.classList.toggle('active',b.dataset.view==='lista'));
+  const list=allCitas.filter(c=>c.fecha===dateStr);
+  const container=document.getElementById('citasList');
+  if(list.length===0){container.innerHTML=`<div class="empty-state"><h3>Sin citas para esta fecha</h3></div>`;return;}
+  container.innerHTML=list.map(c=>`
+    <div class="cita-card estado-${c.estado}">
+      <div>
+        <div class="cita-header"><span class="name">${c.nombre}</span><span class="estado-badge ${c.estado}">${c.estado}</span></div>
+        <div class="cita-meta">
+          <div class="meta-item"><span class="meta-label">Plan</span><span class="meta-value plan">${PLAN_LABELS[c.plan]||c.plan||'—'}</span></div>
+          <div class="meta-item"><span class="meta-label">Hora</span><span class="meta-value">${c.hora}</span></div>
+          <div class="meta-item"><span class="meta-label">Negocio</span><span class="meta-value">${c.negocio||'—'}</span></div>
+          <div class="meta-item"><span class="meta-label">Teléfono</span><span class="meta-value">${c.telefono||'—'}</span></div>
+        </div>
+        ${c.notas?`<div class="cita-notas">"${c.notas}"</div>`:''}
+      </div>
+      <div class="cita-actions">
+        ${c.estado!=='aprobada'?`<button class="action-btn btn-aprobar" onclick="cambiarEstado(${c.id},'aprobada')">✓ Aprobar</button>`:''}
+        ${c.estado!=='rechazada'?`<button class="action-btn btn-rechazar" onclick="cambiarEstado(${c.id},'rechazada')">✗ Rechazar</button>`:''}
+        <button class="action-btn btn-editar" onclick="openEdit(${c.id})">✎ Editar</button>
+      </div>
+    </div>`).join('');
+}
+
+function openEdit(id){
+  const c=allCitas.find(x=>x.id===id);
+  if(!c)return;
+  document.getElementById('editId').value=c.id;
+  document.getElementById('editNombre').value=c.nombre||'';
+  document.getElementById('editNegocio').value=c.negocio||'';
+  document.getElementById('editTelefono').value=c.telefono||'';
+  document.getElementById('editCorreo').value=c.correo||'';
+  document.getElementById('editPlan').value=c.plan||'basico';
+  document.getElementById('editEstado').value=c.estado||'pendiente';
+  document.getElementById('editFecha').value=c.fecha||'';
+  document.getElementById('editHora').value=c.hora||'';
+  document.getElementById('editNotas').value=c.notas||'';
+  document.getElementById('editModal').classList.add('open');
+}
+
+function closeModal(){document.getElementById('editModal').classList.remove('open');}
+
+async function saveEdit(){
+  const id=document.getElementById('editId').value;
+  const data={
+    nombre:document.getElementById('editNombre').value,
+    negocio:document.getElementById('editNegocio').value,
+    telefono:document.getElementById('editTelefono').value,
+    correo:document.getElementById('editCorreo').value,
+    plan:document.getElementById('editPlan').value,
+    estado:document.getElementById('editEstado').value,
+    fecha:document.getElementById('editFecha').value,
+    hora:document.getElementById('editHora').value,
+    notas:document.getElementById('editNotas').value
+  };
+  await fetch(`/api/citas/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+  closeModal();
+  cargar();
+}
+
+async function cambiarEstado(id,estado){
+  await fetch(`/api/citas/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({estado})});
+  cargar();
+}
+
+async function eliminarCita(id){
+  if(!confirm('¿Eliminar esta cita permanentemente?'))return;
+  await fetch(`/api/citas/${id}`,{method:'DELETE'});
+  cargar();
+}
+
+function exportCSV(){
+  const list=getFiltered();
+  if(list.length===0){alert('No hay datos para exportar.');return;}
+  const headers=['ID','Nombre','Negocio','Telefono','Correo','Plan','Fecha','Hora','Estado','Notas','Creado'];
+  const rows=list.map(c=>[c.id,c.nombre,c.negocio,c.telefono,c.correo,c.plan,c.fecha,c.hora,c.estado,c.notas,c.creado]);
+  const csv=[headers,...rows].map(r=>r.map(v=>`"${(v||'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`citas_lopez_tech_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();URL.revokeObjectURL(url);
+}
+
+async function cargar(){
+  const r=await fetch('/api/citas');
+  allCitas=await r.json();
+  updateStats();
+  renderTodayWidget();
+  renderList();
+  if(currentView==='calendario') renderCalendar();
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter=btn.dataset.filter;
+    renderList();
+  });
+});
+
+document.getElementById('sortSelect').addEventListener('change',e=>{currentSort=e.target.value;renderList();});
+
+document.getElementById('searchInput').addEventListener('input',e=>{searchTerm=e.target.value;renderList();});
+
+document.querySelectorAll('.view-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentView=btn.dataset.view;
+    document.getElementById('listView').classList.toggle('active',currentView==='lista');
+    document.getElementById('calView').classList.toggle('active',currentView==='calendario');
+    if(currentView==='calendario') renderCalendar();
+  });
+});
+
+document.getElementById('calPrev').addEventListener('click',()=>{calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCalendar();});
+document.getElementById('calNext').addEventListener('click',()=>{calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCalendar();});
+document.getElementById('calToday').addEventListener('click',()=>{calMonth=new Date().getMonth();calYear=new Date().getFullYear();renderCalendar();});
+
+document.getElementById('exportBtn').addEventListener('click',exportCSV);
+document.getElementById('modalClose').addEventListener('click',closeModal);
+document.getElementById('modalCancel').addEventListener('click',closeModal);
+document.getElementById('modalSave').addEventListener('click',saveEdit);
+document.getElementById('editModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+
+cargar();
+</script>
+</body>
+</html>
