@@ -4,7 +4,7 @@ const { createClient } = require('@libsql/client');
 const app = express();
 
 app.use(express.json());
-app.use(express.static('public'));
+// No express.static aquí; Vercel sirve /public via @vercel/static
 
 // Cliente Turso (lee env vars)
 const db = createClient({
