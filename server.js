@@ -8,12 +8,20 @@ app.use(express.static('public'));
 // Pool de conexiones PostgreSQL
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || process.env.POSTGRES_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
+});
+
+pool.on('error', (err) => {
+  console.error('Unexpected error on idle client', err);
 });
 
 // Inicializar tabla
 async function initDb() {
   try {
+    console.log('Attempting to connect to PostgreSQL...');
+    console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
+    console.log('POSTGRES_URL exists:', !!process.env.POSTGRES_URL);
+    
     await pool.query(`
       CREATE TABLE IF NOT EXISTS citas(
         id SERIAL PRIMARY KEY,
@@ -32,6 +40,7 @@ async function initDb() {
     console.log('Tabla citas lista');
   } catch (e) {
     console.error('Error init DB:', e.message);
+    console.error('Full error:', e);
   }
 }
 initDb();
@@ -64,7 +73,7 @@ app.get('/api/citas/proxima', async (req, res) => {
     );
     res.json(result.rows[0] || null);
   } catch (e) {
-    res.status(50).json({ error: e.message });
+    res.status(500).json({ error: e.message });
   }
 });
 
